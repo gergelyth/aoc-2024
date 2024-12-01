@@ -8,16 +8,18 @@ def solution(input: str) -> tuple[any, any]:
     lines = get_lines(input)
     col1 = []
     col2 = []
+    col2_counts = {}
+
     for line in lines:
         parts = line.split()
         col1.append(int(parts[0]))
-        col2.append(int(parts[1]))
 
-    col1.sort()
-    col2.sort()
+        number = int(parts[1])
+        col2.append(number)
+        col2_counts[number] = col2_counts.get(number, 0) + 1
 
-    differences = [abs(x - y) for x, y in zip(col1, col2)]
-    return (sum(differences), None)
+    result = sum([col2_counts.get(i, 0) * i for i in col1])
+    return (None, result)
 
 puzzle = Puzzle(2024, 1)
-test_and_submit(puzzle, solution, True)
+test_and_submit(puzzle, solution, False)
