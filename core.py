@@ -1,11 +1,13 @@
-from aocd.models import Puzzle
-from typing import Callable
-from glob import glob
 import shutil
+from glob import glob
+from typing import Callable
+
+from aocd.models import Puzzle
+
 
 def invalidate_cache():
-    shutil.rmtree(glob("/home/vscode/.config/aocd/*gergelyth*")[0])
-    shutil.rmtree("/home/vscode/.config/aocd/prose")
+    shutil.rmtree(glob("/home/*/.config/aocd/*gergelyth*")[0])
+    shutil.rmtree(glob("/home/*/.config/aocd/prose")[0])
 
 # As arguments, we take the puzzle and the algorithm which computes answer A and answer B.
 def test_and_submit(puzzle: Puzzle, algorithm: Callable[[str], tuple[any, any]], dry_run: bool = True):
@@ -16,19 +18,19 @@ def test_and_submit(puzzle: Puzzle, algorithm: Callable[[str], tuple[any, any]],
             raise AssertionError(f"Test A failed. Expected result: {example.answer_a}, got: {test_result[0]}")
         if example.answer_b and str(test_result[1]) != str(example.answer_b):
             raise AssertionError(f"Test B failed. Expected result: {example.answer_b}, got: {test_result[1]}")
-        
+
     print("All primary tests passed.")
     if dry_run:
         return
-    
+
     live_result = algorithm(puzzle.input_data)
-    
+
     if not puzzle.answered_a:
         puzzle.answer_a = live_result[0]
         if puzzle.answered_a:
             invalidate_cache()
         return
-        
+
     if not puzzle.answered_b:
         puzzle.answer_b = live_result[1]
         return
