@@ -5,18 +5,25 @@ from core import test_and_submit
 from util import get_lines
 
 
-def is_correct_update(pages: list[str], rules: dict[str, set[str]]) -> bool:
+def get_correct_update(pages: list[str], rules: dict[str, set[str]]) -> list[str]:
     all_pages = set(pages)
     previous_pages = set()
+    correct_order = []
     for page in pages:
+        if page in previous_pages:
+            continue
+
         if page in rules:
             must_be_before_pages = all_pages.intersection(rules[page])
-            if any(p not in previous_pages for p in must_be_before_pages):
-                return False
+            wrong_order_pages = [p for p in must_be_before_pages if p not in previous_pages]
+            if wrong_order_pages:
+                previous_pages.update(wrong_order_pages)
+                correct_order += wrong_order_pages
 
         previous_pages.add(page)
+        correct_order.append(page)
 
-    return True
+    return correct_order
 
 def solution(input: str) -> tuple[any, any]:
     lines = get_lines(input)
@@ -35,11 +42,21 @@ def solution(input: str) -> tuple[any, any]:
     result = 0
     for update in updates:
         parts = update.split(",")
-        if is_correct_update(parts, rules):
-            middle = parts[len(parts)//2]
+        corrected = False
+
+        updated = parts
+        while True:
+            new_updated = get_correct_update(updated, rules)
+            if new_updated == updated:
+                break
+            corrected = True
+            updated = new_updated
+
+        if corrected:
+            middle = updated[len(updated)//2]
             result += int(middle)
 
-    return (result, None)
+    return (None, result)
 
 puzzle = Puzzle(2024, 5)
 test_and_submit(puzzle, solution, False)
